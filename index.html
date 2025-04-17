@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduBlock - Secure Certificate Verification</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="main-header">
+      <div class="header-content">
+        <h1 class="logo"><span></span></h1>
+        <nav class="main-nav">
+          <ul class="nav-list">
+            <li>Upload</li>
+            <li>Verify</li>
+            <li>About</li>
+          </ul>
+        </nav>
+      </div>
+      <button class="wallet-button" data-el="button-1">
+        <template data-el="show">
+          <span>
+            <template data-el="div-1">
+              <!-- Connected wallet address will be displayed here -->
+            </template>
+          </span>
+        </template>
+        <template data-el="show-2"><span>Connect Wallet</span></template>
+      </button>
+    </header>
+
+    <div class="hero-banner">
+      <h1>
+        <span class="hero-spacing">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span>
+        <span class="hero-title">EduBlock</span>
+      </h1>
+      <p></p>
+    </div>
+
+    <main class="main-content">
+      <section class="intro-section">
+        <h2 class="section-title">Secure Certificate Verification on Arbitrum</h2>
+        <p class="section-description">
+          Upload and verify educational certificates using blockchain technology
+          for tamper-proof authenticity.
+        </p>
+      </section>
+
+      <div class="action-cards">
+        <div class="upload-card" data-el="div-2">
+          <h3 class="card-title">Upload Certificate</h3>
+          <div class="dropzone" data-el="div-3">
+            <p class="dropzone-content">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="upload-icon" data-el="svg-1">
+                <path d="M12 4V16M12 16L8 12M12 16L16 12" stroke="currentColor" stroke-width="2"></path>
+                <path d="M20 21H4" stroke="currentColor" stroke-width="2"></path>
+              </svg>
+              <span>Drag and drop your certificate here</span>
+            </p>
+            <p class="format-info">
+              <span>Supported formats:</span>
+              <span class="format-badge">PDF</span>
+              <span class="format-badge">JPG</span>
+              <span class="format-badge">PNG</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="verify-card">
+          <h3 class="card-title">Verify Certificate</h3>
+          <div class="dropzone" data-el="div-4">
+            <p class="dropzone-content">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="verify-icon">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span>Drag and drop certificate to verify</span>
+            </p>
+            <p class="format-info">
+              <span>Supported formats:</span>
+              <span class="format-badge">PDF</span>
+              <span class="format-badge">JPG</span>
+              <span class="format-badge">PNG</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <section class="how-it-works">
+        <div class="section-container">
+          <h2 class="section-title">How It Works</h2>
+          <div class="steps-grid">
+            <template data-el="for">
+              <div class="step-card" data-el="div-5">
+                <div class="step-icon">
+                  <template data-el="div-6"><!-- step.icon --></template>
+                </div>
+                <h3 class="step-title">
+                  <template data-el="div-7"><!-- step.title --></template>
+                </h3>
+                <p class="step-description">
+                  <template data-el="div-8"><!-- step.description --></template>
+                </p>
+              </div>
+            </template>
+          </div>
+        </div>
+      </section>
+
+      <section class="benefits-section">
+        <div class="section-container">
+          <h2 class="section-title">Key Benefits</h2>
+          <div class="benefits-grid">
+            <template data-el="for-2">
+              <div class="benefit-card" data-el="div-9">
+                <div class="benefit-icon">
+                  <template data-el="div-10"><!-- benefit.icon --></template>
+                </div>
+                <h3 class="benefit-title">
+                  <template data-el="div-11"><!-- benefit.title --></template>
+                </h3>
+                <p class="benefit-description">
+                  <template data-el="div-12"><!-- benefit.description --></template>
+                </p>
+              </div>
+            </template>
+          </div>
+        </div>
+      </section>
+
+      <section class="faq-section">
+        <div class="section-container">
+          <h2 class="section-title">Frequently Asked Questions</h2>
+          <div class="faq-list">
+            <template data-el="for-3">
+              <div class="faq-item" data-el="div-13">
+                <h3 class="faq-question">
+                  <template data-el="div-14"><!-- faq.question --></template>
+                </h3>
+                <p class="faq-answer">
+                  <template data-el="div-15"><!-- faq.answer --></template>
+                </p>
+              </div>
+            </template>
+          </div>
+        </div>
+      </section>
+
+      <section class="about-section">
+        <div class="section-container">
+          <h2 class="section-title">About EduBlock</h2>
+          <p class="about-description">
+            EduBlock is a decentralized application that helps users verify
+            educational certificates using blockchain technology. Built with ❤️
+            by the HashCrackers team for DecentralHack 2025.
+          </p>
+          <div class="about-links">
+            <a class="github-link" href="https://github.com/SAFAL-TIWARI" target="_blank">
+              GitHub
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="qr-code-section">
+        <div class="section-container">
+          <h2 class="section-title">QR Code for Certificate</h2>
+          <div class="qr-code-container">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?data=samplelink" alt="QR Code" class="qr-code-image" />
+            <button class="download-button" data-el="button-2">Download QR Code</button>
+          </div>
+        </div>
+      </section>
+
+      <footer class="main-footer">
+        <div class="footer-content">
+          <div class="copyright">© 2025 EduBlock. All rights reserved.</div>
+          <div class="footer-links">
+            <a class="footer-link" href="/terms">Terms</a>
+            <a class="footer-link" href="/privacy">Privacy</a>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <template data-el="show-3">
+    <div class="modal-overlay" data-el="div-16">
+      <div class="modal-container" data-el="div-17">
+        <button class="close-button" data-el="div-18">✕</button>
+        <h3 class="modal-title">Certificate Verified</h3>
+        <div id="certificate-qr-code" class="qr-code-container">
+          <QrCode level="H" data-el="qr-code"></QrCode>
+        </div>
+        <div class="modal-actions">
+          <button class="download-button" data-el="button-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Download</span>
+          </button>
+          <button class="share-button" data-el="button-3">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+            <span>Share</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <img src="https://cdn.builder.io/api/v1/pixel?apiKey=00c5e3f0fae04fbcae7e785028ea80ea" aria-hidden="true" alt="" role="presentation" width="0" height="0" class="hidden-image" />
+</body>
+</html>
