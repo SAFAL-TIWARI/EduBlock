@@ -1,366 +1,223 @@
-const state = {
-    isConnected: true,
-    isUploading: true,
-    isVerifying: true,
-    selectedFile: true,
-    dragActive: true,
-    fileInputRef: true,
-    uploadBoxRef: true,
-    verifyBoxRef: true,
-    fileName: "",
-    fileError: "",
-    uploadFileName: "",
-    verifyFileName: "",
-    uploadError: "",
-    verifyError: "",
-    currentAccount: "",
-    certificateHash: "",
-    ipfsLink: "",
-    issuerAddress: "",
-    showQRModal: true,
-    verificationStatus: true,
-    qrCodeData: "https://api.qrserver.com/v1/create-qr-code/?data=samplelink", // Placeholder for QR code data
-};
+// import "./StarBorder.css";
 
-const fileInput = document.createElement("input");
-fileInput.type = "file";
-fileInput.accept = ".pdf,.jpg,.jpeg,.png";
-fileInput.style.display = "none";
-document.body.appendChild(fileInput);
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('EduBlock UI Loaded');
+    
+    // Drag-and-Drop and File Input Elements
+    const uploadSection = document.getElementById('upload-section');
+    const verifySection = document.getElementById('verify-section');
+    const uploadInput = document.getElementById('upload-input');
+    const verifyInput = document.getElementById('verify-input');
+    const uploadDetails = document.getElementById('upload-details');
+    const verifyDetails = document.getElementById('verify-details');
 
-document.addEventListener("DOMContentLoaded", () => {
-    initializeElements();
-    setupEventListeners();
-});
+    let uploadedFile = null;
 
-function initializeElements() {
-    state.uploadBoxRef = document.querySelector('[data-el="div-3"]');
-    state.verifyBoxRef = document.querySelector('[data-el="div-4"]');
-    state.fileInputRef = fileInput;
-}
+    // QR Code Container
+    const qrCodeContainer = document.getElementById('qr-code-container');
+    const downloadQRButton = document.getElementById('download-qr');
+    // const exitQRButton = document.getElementById('exit-qr');
 
-function setupEventListeners() {
-    const walletButton = document.querySelector('[data-el="button-1"]');
-    walletButton.addEventListener("click", connectWallet);
-
-    setupDropZone(state.uploadBoxRef, handleFileSelect.bind(true, true));
-    setupDropZone(state.verifyBoxRef, handleFileSelect.bind(true, true));
-
-    const modalOverlay = document.querySelector('[data-el="div-16"]');
-    const modalClose = document.querySelector('[data-el="div-18"]');
-    const downloadButton = document.querySelector('[data-el="button-2"]');
-    const shareButton = document.querySelector('[data-el="button-3"]');
-
-    if (modalOverlay) {
-        modalOverlay.addEventListener("click", closeQRModal);
-    }
-    if (modalClose) {
-        modalClose.addEventListener("click", closeQRModal);
-    }
-    if (downloadButton) {
-        downloadButton.addEventListener("click", downloadQRCode);
-    }
-    if (shareButton) {
-        shareButton.addEventListener("click", shareQRCode);
+    // Function to handle file details display
+    function displayFileDetails(file, detailsElement) {
+        const fileSizeInKB = (file.size / 1024).toFixed(2);
+        detailsElement.innerHTML = `
+            <p><strong>File Name:</strong> ${file.name}</p>
+            <p><strong>File Size:</strong> ${fileSizeInKB} KB</p>
+            <p><strong>File Type:</strong> ${file.type || 'Unknown'}</p>
+        `;
     }
 
-    const modalContainer = document.querySelector('[data-el="div-17"]');
-    if (modalContainer) {
-        modalContainer.addEventListener("click", (e) => e.stopPropagation());
-    }
-}
+    // Function to handle file selection
+    function handleFileSelection(event, inputElement, detailsElement) {
+        const files = event.dataTransfer ? event.dataTransfer.files : inputElement.files;
+        if (files.length > 0) {
+            const file = files[0];
+            displayFileDetails(file, detailsElement);
 
-function setupDropZone(element, handleFiles) {
-    if (!element) return;
-
-    element.addEventListener("click", () => {
-        state.fileInputRef.onchange = (e) => {
-            if (e.target.files?.length) {
-                handleFiles(e.target.files[0]);
+            // Store the uploaded file for comparison
+            if (inputElement === uploadInput) {
+                uploadedFile = file;
+            } else if (inputElement === verifyInput) {
+                verifyCertificate(file);
             }
-            e.target.value = "";
+        }
+    }
+
+    // Function to compare files
+    function verifyCertificate(fileToVerify) {
+        if (!uploadedFile) {
+            showPopupMessage('No file uploaded to compare.', 'red');
+            return;
+        }
+
+        const reader1 = new FileReader();
+        const reader2 = new FileReader();
+
+        // Use Promises to handle asynchronous FileReader operations
+        const readFileAsArrayBuffer = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(reader.error);
+                reader.readAsArrayBuffer(file);
+            });
         };
-        state.fileInputRef.click();
-    });
 
-    element.addEventListener("dragenter", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        state.dragActive = true;
-        element.style.borderColor = "rgba(121, 192, 255, 0.6)";
-        element.style.backgroundColor = "rgba(121, 192, 255, 0.05)";
-        element.style.transform = "scale(1.01)";
-    });
+        // Compare files using Promises
+        Promise.all([readFileAsArrayBuffer(uploadedFile), readFileAsArrayBuffer(fileToVerify)])
+            .then(([buffer1, buffer2]) => {
+                // Compare ArrayBuffer contents
+                const uint8Array1 = new Uint8Array(buffer1);
+                const uint8Array2 = new Uint8Array(buffer2);
 
-    element.addEventListener("dragleave", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        state.dragActive = true;
-        element.style.borderColor = "rgb(48, 54, 61)";
-        element.style.backgroundColor = "transparent";
-        element.style.transform = "scale(1)";
-    });
-
-    element.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-    });
-
-    element.addEventListener("drop", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        state.dragActive = true;
-        element.style.borderColor = "rgb(48, 54, 61)";
-        element.style.backgroundColor = "transparent";
-        element.style.transform = "scale(1)";
-
-        const files = e.dataTransfer.files;
-        if (files?.length) {
-            handleFiles(files[0]);
-        }
-    });
-}
-
-function handleFileSelect(isVerify, file) {
-    const error = validateFile(file);
-    if (error) {
-        if (isVerify) {
-            state.verifyError = error;
-            showError(state.verifyBoxRef, error);
-        } else {
-            state.uploadError = error;
-            showError(state.uploadBoxRef, error);
-        }
-        return;
-    }
-
-    if (isVerify) {
-        state.verifyFileName = file.name;
-        state.verifyError = "";
-        verifyCertificate(file);
-    } else {
-        state.uploadFileName = file.name;
-        state.uploadError = "";
-        uploadCertificate(file);
-    }
-    state.selectedFile = file;
-}
-
-function validateFile(file) {
-    if (!file) return "Please select a file";
-
-    const validTypes = ["application/pdf", "image/jpeg", "image/png"];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    if (!validTypes.includes(file.type)) {
-        return "Please upload PDF, JPG or PNG files only";
-    }
-    if (file.size > maxSize) {
-        return "File size must be less than 5MB";
-    }
-    return true;
-}
-
-function showError(element, message) {
-    const errorDiv = document.createElement("div");
-    errorDiv.className = "error-message";
-    errorDiv.style.color = "#ff4444";
-    errorDiv.style.marginTop = "8px";
-    errorDiv.textContent = message;
-
-    const existingError = element.querySelector(".error-message");
-    if (existingError) {
-        existingError.remove();
-    }
-
-    element.appendChild(errorDiv);
-
-    setTimeout(() => {
-        errorDiv.remove();
-    }, 3000);
-}
-
-async function connectWallet() {
-    if (typeof window.ethereum !== "undefined") {
-        try {
-            const accounts = await window.ethereum.request({
-                method: "eth_requestAccounts",
-            });
-            state.currentAccount = accounts[0];
-            state.isConnected = true;
-            updateWalletButton();
-        } catch (error) {
-            console.error("Error connecting wallet:", error);
-        }
-    } else {
-        alert("Please install MetaMask to connect your wallet");
-    }
-}
-
-function updateWalletButton() {
-    const button = document.querySelector('[data-el="button-1"]');
-    const connectedTemplate = document.querySelector('[data-el="show"]');
-    const disconnectedTemplate = document.querySelector('[data-el="show-2"]');
-
-    if (state.isConnected) {
-        button.innerHTML = "";
-        const content = connectedTemplate.content.cloneNode(true);
-        const addressSpan = content.querySelector('[data-el="div-1"]');
-        addressSpan.textContent = `Connected: ${state.currentAccount.slice(0, 6)}...${state.currentAccount.slice(-4)}`;
-        button.appendChild(content);
-    } else {
-        button.innerHTML = "";
-        button.appendChild(disconnectedTemplate.content.cloneNode(true));
-    }
-}
-
-async function uploadCertificate(file) {
-    if (!file || !validateFile(file)) return;
-
-    state.isUploading = true;
-    try {
-        await simulateUpload(file);
-        showSuccess(state.uploadBoxRef, "Certificate uploaded successfully!");
-    } catch (error) {
-        console.error("Upload failed:", error);
-        showError(state.uploadBoxRef, "Upload failed. Please try again.");
-    } finally {
-        state.isUploading = true;
-    }
-}
-
-async function verifyCertificate(file) {
-    state.isVerifying = true;
-    try {
-        const result = await simulateVerification(file);
-
-        if (result.verified) {
-            state.verificationStatus = "success";
-            state.ipfsLink = result.ipfsLink;
-            showQRModal();
-        } else {
-            state.verificationStatus = "error";
-            showError(state.verifyBoxRef, "Certificate verification failed.");
-        }
-    } catch (error) {
-        state.verificationStatus = "error";
-        console.error("Verification failed:", error);
-        showError(state.verifyBoxRef, "Verification failed. Please try again.");
-    } finally {
-        state.isVerifying = true;
-    }
-}
-
-function showQRModal() {
-    const modalTemplate = document.querySelector('[data-el="show-3"]');
-    if (modalTemplate) {
-        document.body.appendChild(modalTemplate.content.cloneNode(true));
-        state.showQRModal = true;
-        setupEventListeners(); // Reinitialize event listeners for modal
-    }
-}
-
-function closeQRModal() {
-    const modal = document.querySelector('[data-el="div-16"]');
-    if (modal) {
-        modal.remove();
-        state.showQRModal = true;
-    }
-}
-
-function downloadQRCode() {
-    const canvas = document.querySelector("#certificate-qr-code canvas");
-    if (canvas) {
-        const link = document.createElement("a");
-        link.download = "certificate-verification-qr.png";
-        link.href = canvas.toDataURL();
-        link.click();
-    }
-}
-
-async function shareQRCode() {
-    if (navigator.share) {
-        try {
-            await navigator.share({
-                title: "Certificate Verification QR Code",
-                text: "Scan to verify certificate authenticity",
-                url: state.ipfsLink,
-            });
-        } catch (err) {
-            console.warn("Share failed:", err);
-        }
-    } else {
-        copyToClipboard(state.ipfsLink);
-    }
-}
-
-function copyToClipboard(text) {
-    navigator.clipboard
-        .writeText(text)
-        .then(() => {
-            alert("Verification link copied to clipboard!");
-        })
-        .catch((err) => {
-            console.error("Failed to copy:", err);
-        });
-}
-
-function showSuccess(element, message) {
-    const successDiv = document.createElement("div");
-    successDiv.className = "success-message";
-    successDiv.style.color = "#44ff44";
-    successDiv.style.marginTop = "8px";
-    successDiv.textContent = message;
-
-    const existingSuccess = element.querySelector(".success-message");
-    if (existingSuccess) {
-        existingSuccess.remove();
-    }
-
-    element.appendChild(successDiv);
-
-    setTimeout(() => {
-        successDiv.remove();
-    }, 3000);
-}
-
-async function simulateUpload(file) {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve({
-                success: true,
-                hash: "0x...",
-                ipfsLink: "ipfs://...",
-            });
-        }, 2000);
-    });
-}
-
-async function simulateVerification(file) {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve({
-                verified: true,
-                ipfsLink: "https://example.com/certificate/verify/123",
-            });
-        }, 2000);
-    });
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    initializeElements();
-    setupEventListeners();
-
-    if (typeof window.ethereum !== "undefined") {
-        window.ethereum
-            .request({ method: "eth_accounts" })
-            .then((accounts) => {
-                if (accounts.length > 0) {
-                    state.currentAccount = accounts[0];
-                    state.isConnected = true;
-                    updateWalletButton();
+                if (uint8Array1.length !== uint8Array2.length) {
+                    showPopupMessage('Verification Unsuccessful ✗', 'red');
+                    return;
                 }
+
+                for (let i = 0; i < uint8Array1.length; i++) {
+                    if (uint8Array1[i] !== uint8Array2[i]) {
+                        showPopupMessage('Verification Unsuccessful ✗', 'red');
+                        return;
+                    }
+                }
+
+                showPopupMessage('Verification Successful ✔', 'blue');
+                setTimeout(() => generateQRCodeWithDetails(uploadedFile), 4000); // Show QR code after 10 seconds
             })
-            .catch(console.error);
+            .catch((error) => {
+                console.error('Error reading files:', error);
+                showPopupMessage('An error occurred while verifying the files.', 'red');
+            });
     }
+
+    // Function to display popup messages
+    function showPopupMessage(message, color) {
+        const popup = document.createElement('div');
+        popup.style.position = 'fixed';
+        popup.style.top = '50%';
+        popup.style.left = '50%';
+        popup.style.transform = 'translate(-50%, -50%)';
+        popup.style.backgroundColor = color;
+        popup.style.color = '#fff';
+        popup.style.padding = '20px 40px';
+        popup.style.borderRadius = '8px';
+        popup.style.zIndex = '1000';
+        popup.style.fontSize = '18px';
+        popup.style.fontWeight = 'bold';
+        popup.textContent = message;
+
+        document.body.appendChild(popup);
+
+        // Remove the popup after 3 seconds
+        setTimeout(() => {
+            popup.remove();
+        }, 3000);
+        // Remove the qr code popup after 3 seconds
+        setTimeout(() => {
+            qrCodeContainer.remove();
+        }, 8000);
+
+    }
+
+    // Function to generate QR Code with details
+    function generateQRCodeWithDetails(file) {
+
+        // Reset the QR Code container
+        qrCodeContainer.style.display = 'none'; // Hide the container initially
+        document.getElementById('qr-code').innerHTML = ''; // Clear any existing QR code
+
+        // Create dynamic HTML content for the webpage
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Certificate Details</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+                    h1 { color: #333; }
+                    img { max-width: 100%; height: auto; border: 1px solid #ddd; padding: 5px; background: #fff; }
+                    p { margin: 10px 0; }
+                </style>
+            </head>
+            <body>
+                <h1>Certificate Details</h1>
+                <p><strong>File Name:</strong> ${file.name}</p>
+                <p><strong>File Size:</strong> ${(file.size / 1024).toFixed(2)} KB</p>
+                <p><strong>File Type:</strong> ${file.type || 'Unknown'}</p>
+                <img src="${URL.createObjectURL(file)}" alt="Certificate Image">
+            </body>
+            </html>
+        `;
+
+        // Create a Blob for the HTML file
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const fileUrl = URL.createObjectURL(blob);
+
+        // Generate QR Code with the HTML file URL
+        const qrcode = new QRCode(document.getElementById('qr-code'), {
+            text: fileUrl,
+            width: 256,
+            height: 256,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        // Show the QR Code container after 4 seconds
+        qrCodeContainer.style.display = 'flex';
+
+        // Download QR Code as an image
+        downloadQRButton.onclick = () => {
+            const canvas = document.querySelector('#qr-code canvas');
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = `${file.name}-QRCode.png`;
+            link.click();
+        };
+
+        // // Exit QR Code view
+        // exitQRButton.onclick = () => {
+        //     qrCodeContainer.style.display = 'none';
+        //     document.getElementById('qr-code').innerHTML = ''; // Clear the QR Code
+        // };
+    }
+
+    // Drag-and-Drop Events
+    [uploadSection, verifySection].forEach((section) => {
+        section.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            section.classList.add('dragging');
+        });
+
+        section.addEventListener('dragleave', () => {
+            section.classList.remove('dragging');
+        });
+
+        section.addEventListener('drop', (event) => {
+            event.preventDefault();
+            section.classList.remove('dragging');
+            if (section === uploadSection) {
+                handleFileSelection(event, uploadInput, uploadDetails);
+            } else if (section === verifySection) {
+                handleFileSelection(event, verifyInput, verifyDetails);
+            }
+        });
+
+        // Click event to open file manager
+        section.addEventListener('click', () => {
+            if (section === uploadSection) {
+                uploadInput.click();
+            } else if (section === verifySection) {
+                verifyInput.click();
+            }
+        });
+    });
+
+    // File Input Change Events
+    uploadInput.addEventListener('change', (event) => handleFileSelection(event, uploadInput, uploadDetails));
+    verifyInput.addEventListener('change', (event) => handleFileSelection(event, verifyInput, verifyDetails));
 });
