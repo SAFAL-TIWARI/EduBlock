@@ -1,224 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EduBlock - Secure Certificate Verification</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Secure Certificate Verification on Arbitrum">
+    <title>EduBlock | Secure Certificate Verification</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- StarBorder Animation CSS -->
+    <style>
+        /* StarBorder Animation Styles */
+        .star-border-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .border-gradient-bottom,
+        .border-gradient-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            animation: rotateGradient 6s linear infinite;
+        }
+
+        .border-gradient-bottom {
+            transform: rotate(180deg);
+        }
+
+        @keyframes rotateGradient {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .inner-content {
+            position: relative;
+            z-index: 2;
+        }
+    </style>
 </head>
 <body>
-  <div class="app-container">
-    <header class="main-header">
-      <div class="header-content">
-        <h1 class="logo"><span></span></h1>
-        <nav class="main-nav">
-          <ul class="nav-list">
-            <li>Upload</li>
-            <li>Verify</li>
-            <li>About</li>
-          </ul>
-        </nav>
-      </div>
-      <button class="wallet-button" data-el="button-1">
-        <template data-el="show">
-          <span>
-            <template data-el="div-1">
-              <!-- Connected wallet address will be displayed here -->
-            </template>
-          </span>
-        </template>
-        <template data-el="show-2"><span>Connect Wallet</span></template>
-      </button>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">EduBlock</a>
+            <a href="https://metamask.io" target="_blank" class="btn btn-success">Connect Wallet</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="text-center text-white py-5" id="hero">
+        <h1 class="display-4">Secure Certificate Verification on Arbitrum</h1>
+        <p class="lead">Upload and verify educational certificates using blockchain technology for tamper-proof authenticity.</p>
     </header>
 
-    <div class="hero-banner">
-      <h1>
-        <span class="hero-spacing">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span>
-        <span class="hero-title">EduBlock</span>
-      </h1>
-      <p></p>
+    <div class="d-flex justify-content-center gap-3 mt-4">
+        <!-- Upload Section with animated border -->
+        <div class="card p-4 text-center upload-card star-border-container" id="upload-section">
+            <div class="border-gradient-bottom"></div>
+            <div class="border-gradient-top"></div>
+            <div class="inner-content">
+                <h5>📄 Upload Certificate</h5>
+                <p>Drag and drop your certificate here or click to upload</p>
+                <input type="file" id="upload-input" hidden>
+                <button class="btn btn-primary upload-btn">Upload</button>
+                <!-- File details for upload -->
+                <div id="upload-details" class="file-details mt-3 text-start text-white"></div>
+            </div>
+        </div>
+
+        <!-- Verify Section with animated border -->
+        <div class="card p-4 text-center upload-card star-border-container" id="verify-section">
+            <div class="border-gradient-bottom"></div>
+            <div class="border-gradient-top"></div>
+            <div class="inner-content">
+                <h5>🔍 Verify Certificate</h5>
+                <p>Drag and drop certificate to verify or click to upload</p>
+                <input type="file" id="verify-input" hidden>
+                <button class="btn btn-primary verify-btn">Verify</button>
+                <!-- File details for verify -->
+                <div id="verify-details" class="file-details mt-3 text-start text-white"></div>
+            </div>
+        </div>
     </div>
 
-    <main class="main-content">
-      <section class="intro-section">
-        <h2 class="section-title">Secure Certificate Verification on Arbitrum</h2>
-        <p class="section-description">
-          Upload and verify educational certificates using blockchain technology
-          for tamper-proof authenticity.
-        </p>
-      </section>
+    <div id="qr-code-container" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); flex-direction: column; align-items: center; justify-content: center; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index: 9999;" class="star-border-container">
+        <div id="qr-code"></div>
+        <button id="download-qr" style="margin-top: 10px; padding: 10px 20px; background: blue; color: white; border: none; border-radius: 4px; cursor: pointer;">Download QR Code</button>
+        <button id="exit-qr" style="margin-top: 10px; padding: 10px 20px; background: red; color: white; border: none; border-radius: 4px; cursor: pointer;">Exit</button>
+    </div>
 
-      <div class="action-cards">
-        <div class="upload-card" data-el="div-2">
-          <h3 class="card-title">Upload Certificate</h3>
-          <div class="dropzone" data-el="div-3">
-            <p class="dropzone-content">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="upload-icon" data-el="svg-1">
-                <path d="M12 4V16M12 16L8 12M12 16L16 12" stroke="currentColor" stroke-width="2"></path>
-                <path d="M20 21H4" stroke="currentColor" stroke-width="2"></path>
-              </svg>
-              <span>Drag and drop your certificate here</span>
-            </p>
-            <p class="format-info">
-              <span>Supported formats:</span>
-              <span class="format-badge">PDF</span>
-              <span class="format-badge">JPG</span>
-              <span class="format-badge">PNG</span>
-            </p>
-          </div>
+    <!-- Popup Message Section -->
+    <div id="popup-message" class="popup-message hidden">
+        <div id="popup-content" class="popup-content">
+            <p id="popup-text"></p>
+            <div id="qr-code-container" class="hidden">
+                <img id="qr-code" alt="QR Code">
+                <button class="btn btn-primary mt-3" id="download-qr-btn">Download QR Code</button>
+                <button class="btn btn-danger mt-3" id="exit-popup-btn">Exit</button>
+            </div>
         </div>
+    </div>
 
-        <div class="verify-card">
-          <h3 class="card-title">Verify Certificate</h3>
-          <div class="dropzone" data-el="div-4">
-            <p class="dropzone-content">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="verify-icon">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
-              <span>Drag and drop certificate to verify</span>
-            </p>
-            <p class="format-info">
-              <span>Supported formats:</span>
-              <span class="format-badge">PDF</span>
-              <span class="format-badge">JPG</span>
-              <span class="format-badge">PNG</span>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <section class="how-it-works">
-        <div class="section-container">
-          <h2 class="section-title">How It Works</h2>
-          <div class="steps-grid">
-            <template data-el="for">
-              <div class="step-card" data-el="div-5">
-                <div class="step-icon">
-                  <template data-el="div-6"><!-- step.icon --></template>
+    <!-- How It Works Section -->
+    <section class="py-5" id="how-it-works">
+        <div class="container text-center text-white">
+            <h2>How It Works</h2>
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="card p-4">
+                        <h5>📤 Upload Certificate</h5>
+                        <p>Upload your educational certificate securely.</p>
+                    </div>
                 </div>
-                <h3 class="step-title">
-                  <template data-el="div-7"><!-- step.title --></template>
-                </h3>
-                <p class="step-description">
-                  <template data-el="div-8"><!-- step.description --></template>
-                </p>
-              </div>
-            </template>
-          </div>
-        </div>
-      </section>
-
-      <section class="benefits-section">
-        <div class="section-container">
-          <h2 class="section-title">Key Benefits</h2>
-          <div class="benefits-grid">
-            <template data-el="for-2">
-              <div class="benefit-card" data-el="div-9">
-                <div class="benefit-icon">
-                  <template data-el="div-10"><!-- benefit.icon --></template>
+                <div class="col-md-3">
+                    <div class="card p-4">
+                        <h5>⚙️ Generate Hash</h5>
+                        <p>Generate a unique hash for your certificate.</p>
+                    </div>
                 </div>
-                <h3 class="benefit-title">
-                  <template data-el="div-11"><!-- benefit.title --></template>
-                </h3>
-                <p class="benefit-description">
-                  <template data-el="div-12"><!-- benefit.description --></template>
-                </p>
-              </div>
-            </template>
-          </div>
+                <div class="col-md-3">
+                    <div class="card p-4">
+                        <h5>🔗 Verify via Blockchain</h5>
+                        <p>Verify the hash on the blockchain technology.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-4">
+                        <h5>📥 Get a QR Code</h5>
+                        <p>Download a QR code for secure easy verification.</p>
+                    </div>
+                </div>
+            </div>
         </div>
-      </section>
+    </section>
 
-      <section class="faq-section">
-        <div class="section-container">
-          <h2 class="section-title">Frequently Asked Questions</h2>
-          <div class="faq-list">
-            <template data-el="for-3">
-              <div class="faq-item" data-el="div-13">
-                <h3 class="faq-question">
-                  <template data-el="div-14"><!-- faq.question --></template>
-                </h3>
-                <p class="faq-answer">
-                  <template data-el="div-15"><!-- faq.answer --></template>
-                </p>
-              </div>
-            </template>
-          </div>
+    <!-- Key Benefits Section -->
+    <section class="py-5 bg-dark" id="key-benefits">
+        <div class="container text-center text-white">
+            <h2>Key Benefits</h2>
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="card p-4">
+                        <h5>🔒 Tamper-Proof</h5>
+                        <p>Ensure your certificates are tamper-proof.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-4">
+                        <h5>🌍 Globally Verifiable</h5>
+                        <p>Accessible anywhere in the world instantly.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-4">
+                        <h5>🔏 Privacy First</h5>
+                        <p>Your data is completely secure and private.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-4">
+                        <h5>⚡ Safe & Scalable</h5>
+                        <p>Built on secure and decentralized arbitrum technology.</p>
+                    </div>
+                </div>
+            </div>
         </div>
-      </section>
+    </section>
 
-      <section class="about-section">
-        <div class="section-container">
-          <h2 class="section-title">About EduBlock</h2>
-          <p class="about-description">
-            EduBlock is a decentralized application that helps users verify
-            educational certificates using blockchain technology. Built with ❤️
-            by the HashCrackers team for DecentralHack 2025.
-          </p>
-          <div class="about-links">
-            <a class="github-link" href="https://github.com/SAFAL-TIWARI" target="_blank">
-              GitHub
+    <!-- FAQ Section -->
+    <section class="py-5" id="faq">
+        <div class="container text-white">
+            <h2 class="text-center mb-4">Frequently Asked Questions</h2>
+            <div class="accordion" id="faqAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                            What if my file doesn’t match?
+                        </button>
+                    </h2>
+                    <div id="faq1" class="accordion-collapse collapse show">
+                        <div class="accordion-body">
+                            If your file doesn’t match, it means the certificate has been tampered with or wasn’t issued through our system. Contact the issuer for verification.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#faq2">
+                            Do I need a wallet to verify?
+                        </button>
+                    </h2>
+                    <div id="faq2" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            No, you don’t need a crypto wallet to verify certificates. Our system handles the blockchain interaction for you.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#faq3">
+                            Is it free to use?
+                        </button>
+                    </h2>
+                    <div id="faq3" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            Yes, certificate verification is completely free for end-users. Institutions may have different pricing plans for issuing certificates.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#faq4">
+                            What file formats are supported?
+                        </button>
+                    </h2>
+                    <div id="faq4" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            We support PDF, JPG, and PNG file formats for certificate verification.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About EduBlock Section -->
+    <section class="py-5 bg-dark text-white text-center" id="about-edublock">
+        <div class="container">
+            <h2>About EduBlock</h2>
+            <p class="mt-3">EduBlock is a decentralized application that helps users verify educational certificates using
+                blockchain technology. Built with ❤️ by the HashCrackers team for DecentralHack 2025.</p>
+            <a href="https://github.com/SAFAL-TIWARI" class="btn btn-secondary mt-3" target="_blank">
+                <i class="fab fa-github"></i> GitHub
             </a>
-          </div>
         </div>
-      </section>
+    </section>
 
-      <section class="qr-code-section">
-        <div class="section-container">
-          <h2 class="section-title">QR Code for Certificate</h2>
-          <div class="qr-code-container">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?data=samplelink" alt="QR Code" class="qr-code-image" />
-            <button class="download-button" data-el="button-2">Download QR Code</button>
-          </div>
+    <!-- Footer -->
+    <footer class="text-center py-3">
+        <div class="container">
+            <p class="text-white">© 2025 EduBlock. All rights reserved.</p>
+            <a href="#" class="text-white mx-2">Terms</a>
+            <a href="#" class="text-white mx-2">Privacy</a>
         </div>
-      </section>
+    </footer>
 
-      <footer class="main-footer">
-        <div class="footer-content">
-          <div class="copyright">© 2025 EduBlock. All rights reserved.</div>
-          <div class="footer-links">
-            <a class="footer-link" href="/terms">Terms</a>
-            <a class="footer-link" href="/privacy">Privacy</a>
-          </div>
-        </div>
-      </footer>
-    </main>
-  </div>
-
-  <template data-el="show-3">
-    <div class="modal-overlay" data-el="div-16">
-      <div class="modal-container" data-el="div-17">
-        <button class="close-button" data-el="div-18">✕</button>
-        <h3 class="modal-title">Certificate Verified</h3>
-        <div id="certificate-qr-code" class="qr-code-container">
-          <QrCode level="H" data-el="qr-code"></QrCode>
-        </div>
-        <div class="modal-actions">
-          <button class="download-button" data-el="button-2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            <span>Download</span>
-          </button>
-          <button class="share-button" data-el="button-3">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="18" cy="5" r="3"></circle>
-              <circle cx="6" cy="12" r="3"></circle>
-              <circle cx="18" cy="19" r="3"></circle>
-              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-            </svg>
-            <span>Share</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </template>
-
-  <img src="https://cdn.builder.io/api/v1/pixel?apiKey=00c5e3f0fae04fbcae7e785028ea80ea" aria-hidden="true" alt="" role="presentation" width="0" height="0" class="hidden-image" />
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Custom JS -->
+    <script src="script.js"></script>
 </body>
 </html>
